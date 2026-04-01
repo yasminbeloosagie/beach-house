@@ -1,0 +1,1219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Belo-Osagie Beach House</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f0f4f8; min-height: 100vh; }
+
+  /* ── SCREENS ── */
+  .screen { display: none; min-height: 100vh; flex-direction: column; }
+  .screen.active { display: flex; }
+
+  /* ── HEADER ── */
+  .hdr { background: #0f6e56; padding: 16px 16px 12px; color: white; flex-shrink: 0; }
+  .hdr-eyebrow { font-size: 11px; opacity: 0.7; margin-bottom: 2px; }
+  .hdr-title { font-size: 20px; font-weight: 600; }
+  .hdr-sub { font-size: 12px; opacity: 0.75; margin-top: 2px; }
+  .hdr-red { background: #c53030; }
+
+  /* ── NAV ── */
+  .nav { display: flex; background: white; border-bottom: 1px solid #e2e8f0; flex-shrink: 0; }
+  .nav-item { flex: 1; text-align: center; padding: 11px 4px; font-size: 12px; color: #718096; cursor: pointer; border-bottom: 2px solid transparent; }
+  .nav-item.active { color: #0f6e56; border-bottom-color: #0f6e56; font-weight: 600; }
+
+  /* ── BODY ── */
+  .body { padding: 14px; flex: 1; overflow-y: auto; }
+
+  /* ── ROLE SELECTOR ── */
+  .role-screen { background: #f0f4f8; justify-content: center; align-items: center; padding: 24px; }
+  .role-logo { text-align: center; margin-bottom: 32px; }
+  .role-logo-icon { font-size: 48px; margin-bottom: 10px; }
+  .role-logo-title { font-size: 24px; font-weight: 700; color: #0f6e56; }
+  .role-logo-sub { font-size: 14px; color: #718096; margin-top: 4px; }
+  .role-card { background: white; border: 1.5px solid #e2e8f0; border-radius: 14px; padding: 16px; display: flex; align-items: center; gap: 14px; margin-bottom: 10px; cursor: pointer; transition: all 0.15s; }
+  .role-card:active { transform: scale(0.98); }
+  .role-icon { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+  .role-icon.green { background: #c6f6d5; }
+  .role-icon.purple { background: #e9d8fd; }
+  .role-icon.coral { background: #FAECE7; }
+  .role-name { font-size: 15px; font-weight: 600; color: #1a202c; }
+  .role-desc { font-size: 12px; color: #718096; margin-top: 2px; }
+
+  /* ── PIN ── */
+  .pin-screen { background: #f0f4f8; justify-content: center; align-items: center; padding: 24px; }
+  .pin-title { font-size: 18px; font-weight: 700; color: #1a202c; text-align: center; margin-bottom: 6px; }
+  .pin-sub { font-size: 13px; color: #718096; text-align: center; margin-bottom: 24px; }
+  .pin-dots { display: flex; justify-content: center; gap: 16px; margin-bottom: 32px; }
+  .pin-dot { width: 16px; height: 16px; border-radius: 50%; background: #e2e8f0; transition: background 0.15s; }
+  .pin-dot.filled { background: #0f6e56; }
+  .pin-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; max-width: 280px; margin: 0 auto; }
+  .pin-key { background: white; border-radius: 12px; padding: 18px; text-align: center; font-size: 22px; font-weight: 600; color: #1a202c; cursor: pointer; border: 1px solid #e2e8f0; transition: all 0.1s; }
+  .pin-key:active { background: #f0f4f8; transform: scale(0.95); }
+  .pin-key.empty { background: transparent; border: none; cursor: default; }
+  .pin-key.del { font-size: 16px; color: #718096; }
+  .pin-error { color: #c53030; font-size: 13px; text-align: center; margin-top: 16px; min-height: 20px; }
+  .pin-back { color: #0f6e56; font-size: 13px; text-align: center; margin-top: 20px; cursor: pointer; }
+
+  /* ── STAT CARDS ── */
+  .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+  .stat { border-radius: 10px; padding: 12px; text-align: center; }
+  .stat-num { font-size: 26px; font-weight: 700; }
+  .stat-label { font-size: 11px; margin-top: 2px; }
+  .stat.red { background: #fff5f5; } .stat.red .stat-num, .stat.red .stat-label { color: #c53030; }
+  .stat.amber { background: #fffbeb; } .stat.amber .stat-num, .stat.amber .stat-label { color: #b45309; }
+  .stat.green { background: #f0fff4; } .stat.green .stat-num, .stat.green .stat-label { color: #276749; }
+  .stat.gray { background: #f7fafc; } .stat.gray .stat-num { color: #2d3748; } .stat.gray .stat-label { color: #718096; }
+
+  /* ── ALERT ── */
+  .alert { border-radius: 10px; padding: 12px 14px; margin-bottom: 14px; }
+  .alert.danger { background: #fff5f5; border: 1px solid #fed7d7; }
+  .alert.success { background: #f0fff4; border: 1px solid #9ae6b4; }
+  .alert.info { background: #ebf8ff; border: 1px solid #90cdf4; }
+  .alert-title { font-size: 13px; font-weight: 700; margin-bottom: 3px; }
+  .alert.danger .alert-title { color: #c53030; }
+  .alert.success .alert-title { color: #276749; }
+  .alert.info .alert-title { color: #2b6cb0; }
+  .alert-body { font-size: 12px; line-height: 1.5; }
+  .alert.danger .alert-body { color: #c53030; }
+  .alert.success .alert-body { color: #276749; }
+  .alert.info .alert-body { color: #2b6cb0; }
+
+  /* ── ITEMS ── */
+  .item { background: white; border-radius: 10px; padding: 12px 14px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+  .item-name { font-size: 14px; font-weight: 600; color: #1a202c; }
+  .item-meta { font-size: 11px; color: #718096; margin-top: 2px; }
+
+  /* ── BADGES ── */
+  .badge { font-size: 11px; padding: 3px 10px; border-radius: 20px; font-weight: 600; white-space: nowrap; }
+  .badge.out { background: #fed7d7; color: #c53030; }
+  .badge.low { background: #feebc8; color: #b45309; }
+  .badge.ok { background: #c6f6d5; color: #276749; }
+  .badge.new { background: #feebc8; color: #b45309; }
+  .badge.missing { background: #fed7d7; color: #c53030; }
+  .badge.consumable { background: #e9d8fd; color: #553c9a; }
+  .badge.durable { background: #bee3f8; color: #2c5282; }
+
+  /* ── SEC LABEL ── */
+  .sec { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: #a0aec0; margin: 14px 0 8px; }
+
+  /* ── CTA BUTTONS ── */
+  .btn { display: block; width: 100%; text-align: center; padding: 14px; border-radius: 12px; font-size: 15px; font-weight: 600; cursor: pointer; border: none; margin-top: 10px; transition: all 0.15s; }
+  .btn:active { transform: scale(0.98); }
+  .btn.primary { background: #0f6e56; color: white; }
+  .btn.secondary { background: white; color: #0f6e56; border: 1.5px solid #0f6e56; }
+  .btn.danger { background: #c53030; color: white; }
+  .btn.danger-outline { background: white; color: #c53030; border: 1.5px solid #fed7d7; }
+  .btn.sm { padding: 10px; font-size: 13px; border-radius: 8px; margin-top: 6px; }
+
+  /* ── COUNTER ── */
+  .counter { display: flex; align-items: center; gap: 12px; }
+  .cnt-btn { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; flex-shrink: 0; transition: all 0.1s; border: none; }
+  .cnt-btn:active { transform: scale(0.9); }
+  .cnt-btn.plus { background: #0f6e56; color: white; }
+  .cnt-btn.minus { background: white; color: #0f6e56; border: 1.5px solid #0f6e56; }
+  .cnt-val { font-size: 22px; font-weight: 700; color: #1a202c; min-width: 32px; text-align: center; }
+
+  /* ── FORM ── */
+  .form-group { margin-bottom: 14px; }
+  .form-label { font-size: 12px; font-weight: 600; color: #4a5568; margin-bottom: 6px; display: block; }
+  .form-input { width: 100%; border: 1.5px solid #e2e8f0; border-radius: 10px; padding: 12px; font-size: 14px; color: #1a202c; background: white; outline: none; }
+  .form-input:focus { border-color: #0f6e56; }
+  .form-select { width: 100%; border: 1.5px solid #e2e8f0; border-radius: 10px; padding: 12px; font-size: 14px; color: #1a202c; background: white; outline: none; appearance: none; }
+  .type-toggle { display: flex; gap: 8px; }
+  .type-opt { flex: 1; text-align: center; padding: 10px; border-radius: 8px; font-size: 13px; font-weight: 600; border: 1.5px solid #e2e8f0; color: #718096; cursor: pointer; transition: all 0.15s; }
+  .type-opt.sel { border-color: #0f6e56; background: #f0fff4; color: #276749; }
+
+  /* ── CHECK ROW (missing items) ── */
+  .check-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #f0f4f8; cursor: pointer; }
+  .check-row:last-child { border-bottom: none; }
+  .check-box { width: 24px; height: 24px; border-radius: 6px; border: 1.5px solid #e2e8f0; background: white; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 14px; transition: all 0.15s; }
+  .check-box.checked { background: #c53030; border-color: #c53030; color: white; }
+
+  /* ── DISPATCH ROW ── */
+  .dispatch-row { background: white; border-radius: 10px; padding: 12px 14px; margin-bottom: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+  .dispatch-top { display: flex; justify-content: space-between; align-items: center; }
+  .dispatch-name { font-size: 14px; font-weight: 600; color: #1a202c; }
+  .dispatch-qty { font-size: 14px; font-weight: 600; color: #0f6e56; }
+  .dispatch-meta { font-size: 11px; color: #718096; margin-top: 3px; }
+
+  /* ── RECON ── */
+  .recon-card { background: white; border-radius: 10px; padding: 14px; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+  .recon-title { font-size: 14px; font-weight: 700; color: #1a202c; margin-bottom: 10px; }
+  .recon-row { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px; }
+  .recon-label { color: #718096; }
+  .recon-val { font-weight: 600; color: #1a202c; }
+  .recon-result { display: flex; justify-content: space-between; align-items: center; border-radius: 8px; padding: 8px 12px; margin-top: 8px; }
+  .recon-result.gap { background: #fff5f5; }
+  .recon-result.ok { background: #f0fff4; }
+  .recon-result-label { font-size: 12px; font-weight: 700; }
+  .recon-result.gap .recon-result-label { color: #c53030; }
+  .recon-result.ok .recon-result-label { color: #276749; }
+
+  /* ── EXPANDED INV ITEM ── */
+  .inv-item { background: white; border-radius: 10px; margin-bottom: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); overflow: hidden; }
+  .inv-item-header { padding: 12px 14px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+  .inv-item-body { padding: 0 14px 14px; border-top: 1px solid #f0f4f8; display: none; }
+  .inv-item-body.open { display: block; }
+  .edit-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; margin-top: 10px; }
+  .edit-label { font-size: 12px; color: #718096; min-width: 80px; }
+
+  /* ── PROGRESS ── */
+  .progress-wrap { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+  .progress-bar-bg { flex: 1; height: 6px; background: #e2e8f0; border-radius: 3px; }
+  .progress-bar { height: 6px; background: #0f6e56; border-radius: 3px; transition: width 0.3s; }
+  .progress-text { font-size: 12px; color: #718096; white-space: nowrap; }
+
+  /* ── LOADING ── */
+  .loading { text-align: center; padding: 40px 20px; color: #718096; font-size: 14px; }
+  .spinner { width: 32px; height: 32px; border: 3px solid #e2e8f0; border-top-color: #0f6e56; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 12px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── EMPTY ── */
+  .empty { text-align: center; padding: 32px 20px; color: #a0aec0; font-size: 14px; }
+
+  /* ── CHECK-IN ITEM ── */
+  .checkin-item { background: white; border-radius: 10px; padding: 12px 14px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+  .checkin-item.new-item { background: #fffbeb; border: 1px solid #fcd34d; }
+  .checkin-item-left { flex: 1; margin-right: 12px; }
+  .checkin-item-name { font-size: 14px; font-weight: 600; color: #1a202c; }
+  .checkin-item-unit { font-size: 11px; color: #a0aec0; margin-top: 2px; }
+
+  /* ── MODAL ── */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: flex-end; z-index: 100; }
+  .modal { background: white; border-radius: 20px 20px 0 0; padding: 24px; width: 100%; }
+  .modal-title { font-size: 17px; font-weight: 700; color: #1a202c; margin-bottom: 8px; }
+  .modal-body { font-size: 14px; color: #718096; line-height: 1.6; margin-bottom: 20px; }
+
+  .fab { position: fixed; bottom: 24px; right: 20px; width: 56px; height: 56px; border-radius: 50%; background: #0f6e56; color: white; font-size: 28px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(15,110,86,0.4); cursor: pointer; border: none; z-index: 10; }
+</style>
+</head>
+<body>
+
+<!-- ══ ROLE SELECTOR ══════════════════════════════════════════ -->
+<div id="screen-role" class="screen role-screen active">
+  <div style="width:100%; max-width:400px;">
+    <div class="role-logo">
+      <div class="role-logo-icon">🏖️</div>
+      <div class="role-logo-title">Belo-Osagie</div>
+      <div class="role-logo-sub">Beach House</div>
+    </div>
+    <p style="font-size:13px; color:#718096; text-align:center; margin-bottom:20px;">Who is checking in?</p>
+    <div class="role-card" onclick="selectRole('caretaker')">
+      <div class="role-icon green">🧹</div>
+      <div><div class="role-name">Caretaker</div><div class="role-desc">Weekly check-in · No PIN needed</div></div>
+    </div>
+    <div class="role-card" onclick="selectRole('team')">
+      <div class="role-icon purple">📊</div>
+      <div><div class="role-name">Team</div><div class="role-desc">Dashboard & dispatch log</div></div>
+    </div>
+    <div class="role-card" onclick="selectRole('admin')">
+      <div class="role-icon coral">⚙️</div>
+      <div><div class="role-name">Admin</div><div class="role-desc">Full inventory control</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PIN ════════════════════════════════════════════════════ -->
+<div id="screen-pin" class="screen pin-screen">
+  <div style="width:100%; max-width:340px;">
+    <div class="pin-title" id="pin-title">Team access</div>
+    <div class="pin-sub">Enter your 4-digit PIN</div>
+    <div class="pin-dots">
+      <div class="pin-dot" id="pd0"></div>
+      <div class="pin-dot" id="pd1"></div>
+      <div class="pin-dot" id="pd2"></div>
+      <div class="pin-dot" id="pd3"></div>
+    </div>
+    <div class="pin-grid">
+      <div class="pin-key" onclick="pinKey('1')">1</div>
+      <div class="pin-key" onclick="pinKey('2')">2</div>
+      <div class="pin-key" onclick="pinKey('3')">3</div>
+      <div class="pin-key" onclick="pinKey('4')">4</div>
+      <div class="pin-key" onclick="pinKey('5')">5</div>
+      <div class="pin-key" onclick="pinKey('6')">6</div>
+      <div class="pin-key" onclick="pinKey('7')">7</div>
+      <div class="pin-key" onclick="pinKey('8')">8</div>
+      <div class="pin-key" onclick="pinKey('9')">9</div>
+      <div class="pin-key empty"></div>
+      <div class="pin-key" onclick="pinKey('0')">0</div>
+      <div class="pin-key del" onclick="pinBack()">⌫</div>
+    </div>
+    <div class="pin-error" id="pin-error"></div>
+    <div class="pin-back" onclick="showScreen('role')">← Back</div>
+  </div>
+</div>
+
+<!-- ══ CARETAKER CHECK-IN ═════════════════════════════════════ -->
+<div id="screen-checkin" class="screen">
+  <div class="hdr">
+    <div class="hdr-eyebrow">Belo-Osagie Beach House</div>
+    <div class="hdr-title">Sunday check-in</div>
+    <div class="hdr-sub" id="checkin-date"></div>
+  </div>
+  <div class="body" id="checkin-body">
+    <div class="loading"><div class="spinner"></div>Loading inventory...</div>
+  </div>
+</div>
+
+<!-- ══ CARETAKER DELIVERY ═════════════════════════════════════ -->
+<div id="screen-delivery" class="screen">
+  <div class="hdr">
+    <div class="hdr-eyebrow">Belo-Osagie Beach House</div>
+    <div class="hdr-title" id="delivery-greeting"></div>
+    <div class="hdr-sub" id="delivery-date"></div>
+  </div>
+  <div class="body" id="delivery-body"></div>
+</div>
+
+<!-- ══ MISSING ITEMS ══════════════════════════════════════════ -->
+<div id="screen-missing" class="screen">
+  <div class="hdr hdr-red">
+    <div class="hdr-eyebrow">Belo-Osagie Beach House</div>
+    <div class="hdr-title">What's missing?</div>
+    <div class="hdr-sub">Tick everything that did not arrive</div>
+  </div>
+  <div class="body" id="missing-body"></div>
+</div>
+
+<!-- ══ URGENT REPORT ══════════════════════════════════════════ -->
+<div id="screen-urgent" class="screen">
+  <div class="hdr hdr-red">
+    <div class="hdr-eyebrow">Belo-Osagie Beach House</div>
+    <div class="hdr-title">Report an issue</div>
+    <div class="hdr-sub">Lagos team will be notified</div>
+  </div>
+  <div class="body">
+    <p style="font-size:13px; color:#718096; line-height:1.6; margin-bottom:16px;">Use this if something needs urgent attention before Sunday — e.g. something ran out or is broken.</p>
+    <div class="form-group">
+      <label class="form-label">What happened?</label>
+      <textarea class="form-input" id="urgent-message" rows="4" placeholder="Describe the issue..."></textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">How urgent is this?</label>
+      <div class="type-toggle">
+        <div class="type-opt sel" id="urg-urgent" onclick="setUrgency('urgent')">🚨 Urgent</div>
+        <div class="type-opt" id="urg-wait" onclick="setUrgency('can-wait')">Can wait</div>
+      </div>
+    </div>
+    <button class="btn danger" onclick="submitUrgent()">Send report</button>
+    <button class="btn secondary" onclick="showCaretakerHome()">Cancel</button>
+  </div>
+</div>
+
+<!-- ══ DASHBOARD ══════════════════════════════════════════════ -->
+<div id="screen-dashboard" class="screen">
+  <div class="hdr">
+    <div class="hdr-eyebrow">Belo-Osagie Beach House</div>
+    <div class="hdr-title">Dashboard</div>
+    <div class="hdr-sub" id="dash-last-checkin">Loading...</div>
+  </div>
+  <div class="nav">
+    <div class="nav-item active" onclick="showTab('home')">Home</div>
+    <div class="nav-item" onclick="showTab('inventory')">Inventory</div>
+    <div class="nav-item" onclick="showTab('dispatch')">Dispatch</div>
+  </div>
+
+  <!-- Home tab -->
+  <div id="tab-home" class="body">
+    <div class="loading"><div class="spinner"></div>Loading...</div>
+  </div>
+
+  <!-- Inventory tab -->
+  <div id="tab-inventory" class="body" style="display:none;">
+    <div class="loading"><div class="spinner"></div>Loading...</div>
+  </div>
+
+  <!-- Dispatch tab -->
+  <div id="tab-dispatch" class="body" style="display:none;">
+    <div class="loading"><div class="spinner"></div>Loading...</div>
+  </div>
+</div>
+
+<!-- ══ ADD ITEM ═══════════════════════════════════════════════ -->
+<div id="screen-add-item" class="screen">
+  <div class="hdr">
+    <div class="hdr-eyebrow">Inventory</div>
+    <div class="hdr-title">Add new item</div>
+    <div class="hdr-sub">Appears in inventory + caretaker form</div>
+  </div>
+  <div class="body">
+    <div class="form-group">
+      <label class="form-label">Item name</label>
+      <input class="form-input" id="add-name" placeholder="e.g. Floaties">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Type</label>
+      <div class="type-toggle">
+        <div class="type-opt sel" id="add-type-con" onclick="setAddType('consumable')">Consumable</div>
+        <div class="type-opt" id="add-type-dur" onclick="setAddType('durable')">Durable</div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Unit (e.g. rolls, bottles, pcs)</label>
+      <input class="form-input" id="add-unit" placeholder="pcs">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Starting quantity</label>
+      <div class="counter" style="margin-top:8px;">
+        <button class="cnt-btn minus" onclick="adjustAdd('qty',-1)">−</button>
+        <span class="cnt-val" id="add-qty">0</span>
+        <button class="cnt-btn plus" onclick="adjustAdd('qty',1)">+</button>
+        <span style="font-size:13px; color:#718096; margin-left:4px;" id="add-qty-unit">pcs</span>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Alert me when below</label>
+      <div class="counter" style="margin-top:8px;">
+        <button class="cnt-btn minus" onclick="adjustAdd('reorder',-1)">−</button>
+        <span class="cnt-val" id="add-reorder">1</span>
+        <button class="cnt-btn plus" onclick="adjustAdd('reorder',1)">+</button>
+        <span style="font-size:13px; color:#718096; margin-left:4px;" id="add-reorder-unit">pcs</span>
+      </div>
+    </div>
+    <div class="alert success" style="margin-top:4px;">
+      <div class="alert-body">✓ Will appear on the caretaker's next check-in automatically</div>
+    </div>
+    <button class="btn primary" onclick="saveNewItem()">Save item</button>
+    <button class="btn secondary" onclick="showTab('inventory')">Cancel</button>
+  </div>
+</div>
+
+<!-- ══ LOG DISPATCH ═══════════════════════════════════════════ -->
+<div id="screen-log-dispatch" class="screen">
+  <div class="hdr">
+    <div class="hdr-eyebrow">Belo-Osagie Beach House</div>
+    <div class="hdr-title">Log a dispatch</div>
+    <div class="hdr-sub">Record items sent to beach house</div>
+  </div>
+  <div class="body">
+    <div class="form-group">
+      <label class="form-label">Date sent</label>
+      <input class="form-input" type="date" id="dis-date">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Item</label>
+      <select class="form-select" id="dis-item"></select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Quantity sent</label>
+      <div class="counter" style="margin-top:8px;">
+        <button class="cnt-btn minus" onclick="adjustDispatch(-1)">−</button>
+        <span class="cnt-val" id="dis-qty">1</span>
+        <button class="cnt-btn plus" onclick="adjustDispatch(1)">+</button>
+        <span style="font-size:13px; color:#718096; margin-left:4px;" id="dis-unit"></span>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Sent by</label>
+      <input class="form-input" id="dis-sender" placeholder="e.g. Lagos office">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Notes (optional)</label>
+      <input class="form-input" id="dis-notes" placeholder="e.g. sent with Friday driver">
+    </div>
+    <button class="btn primary" onclick="saveDispatch()">Confirm dispatch</button>
+    <button class="btn secondary" onclick="showTab('dispatch')">Cancel</button>
+  </div>
+</div>
+
+<!-- ══ DELETE MODAL ═══════════════════════════════════════════ -->
+<div id="modal-delete" class="modal-overlay" style="display:none;">
+  <div class="modal">
+    <div class="modal-title" id="delete-title">Remove item?</div>
+    <div class="modal-body" id="delete-body">This will remove it from inventory and from the caretaker's check-in form. This cannot be undone.</div>
+    <button class="btn danger" onclick="confirmDelete()">Yes, remove it</button>
+    <button class="btn secondary" onclick="closeModal()">Cancel</button>
+  </div>
+</div>
+
+<script>
+// ══ CONFIG ═══════════════════════════════════════════════════
+const API_KEY   = 'AIzaSyDoC_9oXUW0mErg1nn4VSDwV9Wo8ZOWXUQ';
+const SHEET_ID  = '1JEhhxycy0AYqyu04IEm8mx-5Mm882xCMLF8x-80d0_s';
+const BASE_URL  = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values`;
+const TEAM_PIN  = '1234';
+const ADMIN_PIN = '5678';
+
+// ══ STATE ════════════════════════════════════════════════════
+let currentRole  = null;
+let inventory    = [];
+let dispatches   = [];
+let issues       = [];
+let checkins     = [];
+let pinBuffer    = '';
+let pinTarget    = '';
+let addType      = 'consumable';
+let addQty       = 0;
+let addReorder   = 1;
+let disQty       = 1;
+let urgency      = 'urgent';
+let deleteTarget = null;
+let pendingDispatch = null;
+let missingItems = [];
+let checkinCounts = {};
+
+// ══ SHEETS API ═══════════════════════════════════════════════
+async function readSheet(tab) {
+  const r = await fetch(`${BASE_URL}/${tab}?key=${API_KEY}`);
+  const d = await r.json();
+  if (!d.values || d.values.length < 2) return [];
+  const [headers, ...rows] = d.values;
+  return rows.map(row => {
+    const obj = {};
+    headers.forEach((h, i) => obj[h] = row[i] || '');
+    return obj;
+  });
+}
+
+async function appendRow(tab, values) {
+  const r = await fetch(`${BASE_URL}/${tab}:append?valueInputOption=USER_ENTERED&key=${API_KEY}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ values: [values] })
+  });
+  return r.json();
+}
+
+async function updateCell(tab, range, value) {
+  const r = await fetch(`${BASE_URL}/${tab}!${range}?valueInputOption=USER_ENTERED&key=${API_KEY}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ values: [[value]] })
+  });
+  return r.json();
+}
+
+async function loadAll() {
+  [inventory, dispatches, issues, checkins] = await Promise.all([
+    readSheet('Inventory'),
+    readSheet('Dispatches'),
+    readSheet('Issues'),
+    readSheet('Checkins')
+  ]);
+  inventory = inventory.filter(i => i.active === 'TRUE');
+}
+
+// ══ SCREEN ROUTING ═══════════════════════════════════════════
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function selectRole(role) {
+  if (role === 'caretaker') {
+    currentRole = 'caretaker';
+    showCaretakerHome();
+  } else {
+    pinTarget = role;
+    pinBuffer = '';
+    updatePinDots();
+    document.getElementById('pin-title').textContent = role === 'team' ? 'Team access' : 'Admin access';
+    document.getElementById('pin-error').textContent = '';
+    showScreen('pin');
+  }
+}
+
+// ══ PIN ══════════════════════════════════════════════════════
+function pinKey(k) {
+  if (pinBuffer.length >= 4) return;
+  pinBuffer += k;
+  updatePinDots();
+  if (pinBuffer.length === 4) checkPin();
+}
+
+function pinBack() {
+  pinBuffer = pinBuffer.slice(0, -1);
+  updatePinDots();
+}
+
+function updatePinDots() {
+  for (let i = 0; i < 4; i++) {
+    document.getElementById('pd' + i).classList.toggle('filled', i < pinBuffer.length);
+  }
+}
+
+function checkPin() {
+  const correct = pinTarget === 'team' ? TEAM_PIN : ADMIN_PIN;
+  if (pinBuffer === correct) {
+    currentRole = pinTarget;
+    loadDashboard();
+  } else {
+    document.getElementById('pin-error').textContent = 'Incorrect PIN. Try again.';
+    pinBuffer = '';
+    updatePinDots();
+  }
+}
+
+// ══ CARETAKER ════════════════════════════════════════════════
+async function showCaretakerHome() {
+  showScreen('checkin');
+  const d = new Date();
+  document.getElementById('checkin-date').textContent =
+    d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' }) + ' · Count each item carefully';
+
+  await loadAll();
+
+  // Check for pending dispatch
+  const pending = dispatches.find(d => d.confirmed !== 'TRUE');
+  if (pending) {
+    showDeliveryScreen(pending);
+    return;
+  }
+
+  renderCheckinForm();
+}
+
+function renderCheckinForm() {
+  const body = document.getElementById('checkin-body');
+  const total = inventory.length;
+  const done = Object.keys(checkinCounts).length;
+  const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+
+  let html = `
+    <div class="progress-wrap">
+      <div class="progress-text">${done} of ${total} done</div>
+      <div class="progress-bar-bg"><div class="progress-bar" style="width:${pct}%"></div></div>
+      <div class="progress-text">${pct}%</div>
+    </div>
+    <div class="sec">Items — tap + to count each one</div>
+  `;
+
+  inventory.forEach(item => {
+    const count = checkinCounts[item.id] || 0;
+    const isNew = isNewItem(item);
+    html += `
+      <div class="checkin-item ${isNew ? 'new-item' : ''}">
+        <div class="checkin-item-left">
+          <div class="checkin-item-name">${item.name}${isNew ? ' <span class="badge new" style="font-size:9px;">New</span>' : ''}</div>
+          <div class="checkin-item-unit">${item.unit}</div>
+        </div>
+        <div class="counter">
+          <button class="cnt-btn minus" onclick="adjustCheckin('${item.id}',-1)">−</button>
+          <span class="cnt-val" id="ci-${item.id}">${count}</span>
+          <button class="cnt-btn plus" onclick="adjustCheckin('${item.id}',1)">+</button>
+        </div>
+      </div>
+    `;
+  });
+
+  html += `
+    <div class="sec">General</div>
+    <div class="form-group">
+      <label class="form-label">House clean and ready?</label>
+      <div class="type-toggle">
+        <div class="type-opt sel" id="house-yes" onclick="setHouseReady('yes')">Yes ✓</div>
+        <div class="type-opt" id="house-no" onclick="setHouseReady('no')">No</div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Any issues to report?</label>
+      <textarea class="form-input" id="checkin-notes" rows="3" placeholder="Optional — leave blank if all good"></textarea>
+    </div>
+    <button class="btn primary" onclick="submitCheckin()">Submit check-in</button>
+    <button class="btn secondary" style="margin-top:8px;" onclick="showScreen('urgent')">⚠️ Report urgent issue</button>
+  `;
+
+  body.innerHTML = html;
+}
+
+function isNewItem(item) {
+  const oneWeekAgo = new Date();
+  oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+  // Simple heuristic — high ID likely new
+  return parseInt(item.id) > 19;
+}
+
+function adjustCheckin(id, delta) {
+  checkinCounts[id] = Math.max(0, (checkinCounts[id] || 0) + delta);
+  document.getElementById('ci-' + id).textContent = checkinCounts[id];
+  renderCheckinProgress();
+}
+
+function renderCheckinProgress() {
+  const total = inventory.length;
+  const done = Object.keys(checkinCounts).length;
+  const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+  const bar = document.querySelector('.progress-bar');
+  const texts = document.querySelectorAll('.progress-text');
+  if (bar) bar.style.width = pct + '%';
+  if (texts[0]) texts[0].textContent = done + ' of ' + total + ' done';
+  if (texts[1]) texts[1].textContent = pct + '%';
+}
+
+let houseReady = 'yes';
+function setHouseReady(val) {
+  houseReady = val;
+  document.getElementById('house-yes').classList.toggle('sel', val === 'yes');
+  document.getElementById('house-no').classList.toggle('sel', val === 'no');
+}
+
+async function submitCheckin() {
+  const notes = document.getElementById('checkin-notes').value;
+  const ts = new Date().toISOString();
+  const rows = [];
+
+  for (const item of inventory) {
+    const qty = checkinCounts[item.id] || 0;
+    const id = `${Date.now()}-${item.id}`;
+    rows.push([id, ts, item.id, item.name, qty, notes]);
+  }
+
+  document.getElementById('checkin-body').innerHTML = '<div class="loading"><div class="spinner"></div>Submitting...</div>';
+
+  for (const row of rows) {
+    await appendRow('Checkins', row);
+  }
+
+  // Log house ready status as issue if not ready
+  if (houseReady === 'no' || notes) {
+    const issueId = Date.now().toString();
+    await appendRow('Issues', [issueId, ts, 'checkin', `House ready: ${houseReady}. Notes: ${notes}`, 'info', 'FALSE']);
+  }
+
+  document.getElementById('checkin-body').innerHTML = `
+    <div style="text-align:center; padding:40px 20px;">
+      <div style="font-size:48px; margin-bottom:16px;">✅</div>
+      <div style="font-size:18px; font-weight:700; color:#276749; margin-bottom:8px;">Check-in submitted!</div>
+      <div style="font-size:14px; color:#718096; line-height:1.6;">Thank you Usman. The Lagos team has been updated.</div>
+    </div>
+  `;
+  checkinCounts = {};
+}
+
+// ══ DELIVERY ═════════════════════════════════════════════════
+function showDeliveryScreen(dispatch) {
+  pendingDispatch = dispatch;
+  const d = new Date();
+  document.getElementById('delivery-greeting').textContent = 'Good morning, Usman';
+  document.getElementById('delivery-date').textContent =
+    d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
+
+  // Parse items from notes
+  const body = document.getElementById('delivery-body');
+  body.innerHTML = `
+    <div class="alert success">
+      <div class="alert-title">📦 Delivery expected</div>
+      <div class="alert-body">Lagos office sent items on ${dispatch.date_sent}. Please confirm when received.</div>
+    </div>
+    <div style="background:white; border-radius:10px; padding:14px; margin-bottom:12px; box-shadow:0 1px 3px rgba(0,0,0,0.06);">
+      <div style="font-size:13px; font-weight:700; color:#1a202c; margin-bottom:4px;">Expected delivery — ${dispatch.date_sent}</div>
+      <div style="font-size:12px; color:#718096; margin-bottom:10px;">Sent by: ${dispatch.sent_by || 'Lagos office'}</div>
+      <div style="font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:#a0aec0; margin-bottom:8px;">Items in this delivery</div>
+      <div style="display:flex; justify-content:space-between; font-size:13px; padding:6px 0; border-bottom:1px solid #f0f4f8;">
+        <span>${dispatch.item_name}</span>
+        <span style="font-weight:600;">${dispatch.quantity} ${getUnit(dispatch.item_name)}</span>
+      </div>
+    </div>
+    <button class="btn primary" onclick="confirmDelivery()">✓ Confirm delivery received</button>
+    <button class="btn danger-outline" style="margin-top:8px;" onclick="showMissingScreen()">Something is missing</button>
+    <button class="btn secondary" style="margin-top:8px;" onclick="renderCheckinForm(); showScreen('checkin')">Do check-in instead</button>
+  `;
+  showScreen('delivery');
+}
+
+function getUnit(name) {
+  const item = inventory.find(i => i.name === name);
+  return item ? item.unit : 'pcs';
+}
+
+async function confirmDelivery() {
+  document.getElementById('delivery-body').innerHTML = '<div class="loading"><div class="spinner"></div>Confirming...</div>';
+  // Mark as confirmed in issues
+  const ts = new Date().toISOString();
+  await appendRow('Issues', [Date.now().toString(), ts, 'delivery-confirmed', `Delivery confirmed by caretaker`, 'info', 'TRUE']);
+  document.getElementById('delivery-body').innerHTML = `
+    <div style="text-align:center; padding:40px 20px;">
+      <div style="font-size:48px; margin-bottom:16px;">✅</div>
+      <div style="font-size:18px; font-weight:700; color:#276749; margin-bottom:8px;">Delivery confirmed!</div>
+      <div style="font-size:14px; color:#718096;">Thank you. The Lagos team has been notified.</div>
+    </div>
+    <button class="btn secondary" style="margin-top:20px;" onclick="showCaretakerHome()">Go to check-in</button>
+  `;
+}
+
+function showMissingScreen() {
+  missingItems = [];
+  const body = document.getElementById('missing-body');
+  const items = pendingDispatch ? [pendingDispatch] : [];
+
+  let html = '<div class="sec">Tick what is missing</div>';
+  items.forEach((item, i) => {
+    html += `
+      <div class="check-row" onclick="toggleMissing(${i})">
+        <div>
+          <div style="font-size:13px; color:#1a202c;">${item.item_name}</div>
+          <div style="font-size:11px; color:#718096;">Expected: ${item.quantity} ${getUnit(item.item_name)}</div>
+        </div>
+        <div class="check-box" id="chk-${i}"></div>
+      </div>
+    `;
+  });
+
+  html += `
+    <div class="form-group" style="margin-top:16px;">
+      <label class="form-label">Any details? (optional)</label>
+      <textarea class="form-input" id="missing-notes" rows="3" placeholder="e.g. driver said items not loaded"></textarea>
+    </div>
+    <button class="btn danger" onclick="submitMissing()">Send missing report</button>
+    <button class="btn secondary" onclick="showScreen('delivery')">← Go back</button>
+  `;
+
+  body.innerHTML = html;
+  showScreen('missing');
+}
+
+function toggleMissing(i) {
+  const box = document.getElementById('chk-' + i);
+  box.classList.toggle('checked');
+  if (box.classList.contains('checked')) {
+    box.textContent = '✕';
+    missingItems.push(i);
+  } else {
+    box.textContent = '';
+    missingItems = missingItems.filter(x => x !== i);
+  }
+}
+
+async function submitMissing() {
+  const notes = document.getElementById('missing-notes').value;
+  const ts = new Date().toISOString();
+  const issueId = Date.now().toString();
+  await appendRow('Issues', [issueId, ts, 'missing-delivery', `Missing items reported. ${notes}`, 'urgent', 'FALSE']);
+
+  document.getElementById('missing-body').innerHTML = `
+    <div style="text-align:center; padding:40px 20px;">
+      <div style="font-size:48px; margin-bottom:16px;">⚠️</div>
+      <div style="font-size:18px; font-weight:700; color:#c53030; margin-bottom:8px;">Report sent</div>
+      <div style="font-size:14px; color:#718096; line-height:1.6;">The Lagos team has been notified and will follow up.</div>
+    </div>
+    <button class="btn secondary" style="margin-top:20px;" onclick="showCaretakerHome()">Back to home</button>
+  `;
+}
+
+// ══ URGENT ═══════════════════════════════════════════════════
+function setUrgency(val) {
+  urgency = val;
+  document.getElementById('urg-urgent').classList.toggle('sel', val === 'urgent');
+  document.getElementById('urg-wait').classList.toggle('sel', val === 'can-wait');
+}
+
+async function submitUrgent() {
+  const msg = document.getElementById('urgent-message').value;
+  if (!msg.trim()) return alert('Please describe the issue.');
+  const ts = new Date().toISOString();
+  await appendRow('Issues', [Date.now().toString(), ts, 'urgent-report', msg, urgency, 'FALSE']);
+  document.getElementById('urgent-message').value = '';
+  alert('Report sent! The Lagos team will see this on their dashboard.');
+  showCaretakerHome();
+}
+
+// ══ DASHBOARD ════════════════════════════════════════════════
+async function loadDashboard() {
+  showScreen('dashboard');
+  await loadAll();
+  renderHomeTab();
+  renderInventoryTab();
+  renderDispatchTab();
+}
+
+function getStatus(item) {
+  const qty = parseInt(item.quantity) || 0;
+  const reorder = parseInt(item.reorder_at) || 0;
+  if (qty === 0) return 'out';
+  if (qty <= reorder) return 'low';
+  return 'ok';
+}
+
+function showTab(tab) {
+  ['home','inventory','dispatch'].forEach(t => {
+    document.getElementById('tab-' + t).style.display = t === tab ? 'block' : 'none';
+  });
+  document.querySelectorAll('.nav-item').forEach((el, i) => {
+    el.classList.toggle('active', ['home','inventory','dispatch'][i] === tab);
+  });
+  if (tab === 'home') renderHomeTab();
+  if (tab === 'inventory') renderInventoryTab();
+  if (tab === 'dispatch') renderDispatchTab();
+}
+
+function renderHomeTab() {
+  const out  = inventory.filter(i => getStatus(i) === 'out');
+  const low  = inventory.filter(i => getStatus(i) === 'low');
+  const ok   = inventory.filter(i => getStatus(i) === 'ok');
+  const needs = [...out, ...low];
+
+  // Last check-in
+  const lastCI = checkins.length ? checkins[checkins.length - 1].timestamp : null;
+  document.getElementById('dash-last-checkin').textContent = lastCI
+    ? 'Last check-in: ' + new Date(lastCI).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
+    : 'No check-ins yet';
+
+  // Open issues
+  const openIssues = issues.filter(i => i.resolved === 'FALSE' && i.urgency === 'urgent');
+
+  let html = '';
+
+  // Issue alerts
+  openIssues.forEach(issue => {
+    html += `
+      <div class="alert danger" style="margin-bottom:10px;">
+        <div class="alert-title">🚨 ${issue.type === 'missing-delivery' ? 'Delivery issue' : 'Urgent report'}</div>
+        <div class="alert-body">${issue.message}</div>
+        <button class="btn sm primary" style="margin-top:8px;" onclick="resolveIssue('${issue.id}')">Mark as resolved</button>
+      </div>
+    `;
+  });
+
+  if (needs.length) {
+    html += `
+      <div class="alert danger">
+        <div class="alert-title">⚠️ ${needs.length} item${needs.length > 1 ? 's' : ''} need restocking</div>
+        <div class="alert-body">${needs.map(i => i.name).join(' · ')}</div>
+      </div>
+    `;
+  }
+
+  html += `
+    <div class="stat-grid">
+      <div class="stat red"><div class="stat-num">${out.length}</div><div class="stat-label">Out of stock</div></div>
+      <div class="stat amber"><div class="stat-num">${low.length}</div><div class="stat-label">Running low</div></div>
+      <div class="stat green"><div class="stat-num">${ok.length}</div><div class="stat-label">Well stocked</div></div>
+      <div class="stat gray"><div class="stat-num">${inventory.length}</div><div class="stat-label">Total items</div></div>
+    </div>
+  `;
+
+  if (needs.length) {
+    html += '<div class="sec">Needs restocking</div>';
+    needs.forEach(item => {
+      html += `
+        <div class="item">
+          <div><div class="item-name">${item.name}</div><div class="item-meta">${item.quantity} ${item.unit} · reorder at ${item.reorder_at}</div></div>
+          <span class="badge ${getStatus(item)}">${getStatus(item) === 'out' ? 'Out' : 'Low'}</span>
+        </div>
+      `;
+    });
+  }
+
+  html += `<button class="btn primary" style="margin-top:12px;" onclick="showScreen('log-dispatch')">+ Log a dispatch</button>`;
+
+  // Reconciliation
+  if (checkins.length && dispatches.length) {
+    html += renderReconciliation();
+  }
+
+  document.getElementById('tab-home').innerHTML = html;
+}
+
+function renderReconciliation() {
+  // Group last checkin by item
+  const lastCheckinMap = {};
+  const lastDate = checkins[checkins.length - 1]?.timestamp;
+  checkins.filter(c => c.timestamp === lastDate).forEach(c => {
+    lastCheckinMap[c.item_id] = parseInt(c.quantity) || 0;
+  });
+
+  // Group dispatches since last checkin
+  const dispatchMap = {};
+  dispatches.forEach(d => {
+    if (!lastDate || new Date(d.date_sent) >= new Date(lastDate)) {
+      dispatchMap[d.item_id] = (dispatchMap[d.item_id] || 0) + (parseInt(d.quantity) || 0);
+    }
+  });
+
+  let html = '<div class="sec">Stock reconciliation</div>';
+
+  inventory.slice(0, 4).forEach(item => {
+    const had = lastCheckinMap[item.id] || 0;
+    const sent = dispatchMap[item.id] || 0;
+    const shouldHave = had + sent;
+    const reported = parseInt(item.quantity) || 0;
+    const gap = shouldHave - reported;
+    const hasGap = gap > 2;
+
+    html += `
+      <div class="recon-card">
+        <div class="recon-title">${item.name}</div>
+        <div class="recon-row"><div class="recon-label">Had at last check-in</div><div class="recon-val">${had} ${item.unit}</div></div>
+        <div class="recon-row"><div class="recon-label">Dispatched since</div><div class="recon-val">+ ${sent} ${item.unit}</div></div>
+        <div class="recon-row"><div class="recon-label">Should have</div><div class="recon-val">${shouldHave} ${item.unit}</div></div>
+        <div class="recon-row"><div class="recon-label">Currently reported</div><div class="recon-val">${reported} ${item.unit}</div></div>
+        <div class="recon-result ${hasGap ? 'gap' : 'ok'}">
+          <div class="recon-result-label">${hasGap ? '⚠️ Gap of ' + gap + ' ' + item.unit : '✓ All accounted for'}</div>
+        </div>
+      </div>
+    `;
+  });
+
+  return html;
+}
+
+async function resolveIssue(id) {
+  // Find row in issues and update resolved column
+  const allIssues = await readSheet('Issues');
+  const headers = ['id','timestamp','type','message','urgency','resolved'];
+  const rowIdx = allIssues.findIndex(i => i.id === id);
+  if (rowIdx === -1) return;
+  // Row index in sheet is rowIdx + 2 (header + 0-index)
+  const sheetRow = rowIdx + 2;
+  await fetch(`${BASE_URL}/Issues!F${sheetRow}?valueInputOption=USER_ENTERED&key=${API_KEY}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ values: [['TRUE']] })
+  });
+  await loadAll();
+  renderHomeTab();
+}
+
+function renderInventoryTab() {
+  const isAdmin = currentRole === 'admin';
+  let html = '';
+
+  if (isAdmin) {
+    html += `<button class="btn primary" onclick="showScreen('add-item')" style="margin-bottom:14px;">+ Add new item</button>`;
+  }
+
+  html += '<div class="sec">All items</div>';
+
+  inventory.forEach(item => {
+    const status = getStatus(item);
+    html += `
+      <div class="inv-item">
+        <div class="inv-item-header" onclick="toggleInvItem('${item.id}')">
+          <div>
+            <div class="item-name">${item.name}</div>
+            <div class="item-meta">${item.quantity} ${item.unit} · <span class="badge ${item.type}">${item.type}</span></div>
+          </div>
+          <span class="badge ${status}">${status === 'out' ? 'Out' : status === 'low' ? 'Low' : 'OK'}</span>
+        </div>
+        <div class="inv-item-body" id="inv-body-${item.id}">
+          <div class="edit-row" style="margin-top:12px;">
+            <div class="edit-label">In stock</div>
+            <div class="counter">
+              <button class="cnt-btn minus" onclick="adjustInv('${item.id}',-1)">−</button>
+              <span class="cnt-val" id="inv-qty-${item.id}">${item.quantity}</span>
+              <button class="cnt-btn plus" onclick="adjustInv('${item.id}',1)">+</button>
+              <span style="font-size:12px; color:#718096; margin-left:4px;">${item.unit}</span>
+            </div>
+          </div>
+          ${isAdmin ? `
+          <div class="edit-row">
+            <div class="edit-label">Reorder at</div>
+            <div class="counter">
+              <button class="cnt-btn minus" onclick="adjustReorder('${item.id}',-1)">−</button>
+              <span class="cnt-val" id="inv-reorder-${item.id}">${item.reorder_at}</span>
+              <button class="cnt-btn plus" onclick="adjustReorder('${item.id}',1)">+</button>
+              <span style="font-size:12px; color:#718096; margin-left:4px;">${item.unit}</span>
+            </div>
+          </div>
+          <button class="btn sm primary" onclick="saveInvItem('${item.id}')">Save changes</button>
+          <button class="btn sm danger-outline" onclick="promptDelete('${item.id}', '${item.name}')">Remove item</button>
+          ` : `
+          <button class="btn sm primary" onclick="saveInvQty('${item.id}')">Save quantity</button>
+          `}
+        </div>
+      </div>
+    `;
+  });
+
+  document.getElementById('tab-inventory').innerHTML = html;
+}
+
+function toggleInvItem(id) {
+  const body = document.getElementById('inv-body-' + id);
+  body.classList.toggle('open');
+}
+
+function adjustInv(id, delta) {
+  const el = document.getElementById('inv-qty-' + id);
+  el.textContent = Math.max(0, parseInt(el.textContent) + delta);
+}
+
+function adjustReorder(id, delta) {
+  const el = document.getElementById('inv-reorder-' + id);
+  el.textContent = Math.max(0, parseInt(el.textContent) + delta);
+}
+
+async function saveInvQty(id) {
+  const qty = document.getElementById('inv-qty-' + id).textContent;
+  const item = inventory.find(i => i.id === id);
+  if (!item) return;
+  // Find row
+  const all = await readSheet('Inventory');
+  const rowIdx = all.findIndex(i => i.id === id);
+  if (rowIdx === -1) return;
+  const sheetRow = rowIdx + 2;
+  await fetch(`${BASE_URL}/Inventory!E${sheetRow}?valueInputOption=USER_ENTERED&key=${API_KEY}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ values: [[qty]] })
+  });
+  item.quantity = qty;
+  alert('Saved!');
+  renderInventoryTab();
+  renderHomeTab();
+}
+
+async function saveInvItem(id) {
+  const qty = document.getElementById('inv-qty-' + id).textContent;
+  const reorder = document.getElementById('inv-reorder-' + id).textContent;
+  const item = inventory.find(i => i.id === id);
+  if (!item) return;
+  const all = await readSheet('Inventory');
+  const rowIdx = all.findIndex(i => i.id === id);
+  if (rowIdx === -1) return;
+  const sheetRow = rowIdx + 2;
+  await Promise.all([
+    fetch(`${BASE_URL}/Inventory!E${sheetRow}?valueInputOption=USER_ENTERED&key=${API_KEY}`, { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify({values:[[qty]]}) }),
+    fetch(`${BASE_URL}/Inventory!F${sheetRow}?valueInputOption=USER_ENTERED&key=${API_KEY}`, { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify({values:[[reorder]]}) }),
+  ]);
+  item.quantity = qty;
+  item.reorder_at = reorder;
+  alert('Saved!');
+  renderInventoryTab();
+  renderHomeTab();
+}
+
+function promptDelete(id, name) {
+  deleteTarget = id;
+  document.getElementById('delete-title').textContent = `Remove ${name}?`;
+  document.getElementById('modal-delete').style.display = 'flex';
+}
+
+function closeModal() {
+  document.getElementById('modal-delete').style.display = 'none';
+  deleteTarget = null;
+}
+
+async function confirmDelete() {
+  if (!deleteTarget) return;
+  const all = await readSheet('Inventory');
+  const rowIdx = all.findIndex(i => i.id === deleteTarget);
+  if (rowIdx === -1) return closeModal();
+  const sheetRow = rowIdx + 2;
+  await fetch(`${BASE_URL}/Inventory!G${sheetRow}?valueInputOption=USER_ENTERED&key=${API_KEY}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ values: [['FALSE']] })
+  });
+  closeModal();
+  await loadAll();
+  renderInventoryTab();
+  renderHomeTab();
+}
+
+function renderDispatchTab() {
+  let html = `<button class="btn primary" onclick="showScreen('log-dispatch')" style="margin-bottom:14px;">+ Log new dispatch</button>`;
+
+  if (dispatches.length === 0) {
+    html += '<div class="empty">No dispatches logged yet</div>';
+  } else {
+    html += '<div class="sec">Recent dispatches</div>';
+    [...dispatches].reverse().forEach(d => {
+      html += `
+        <div class="dispatch-row">
+          <div class="dispatch-top">
+            <div class="dispatch-name">${d.item_name}</div>
+            <div class="dispatch-qty">${d.quantity} ${getUnit(d.item_name)}</div>
+          </div>
+          <div class="dispatch-meta">${d.date_sent} · ${d.sent_by || '—'}${d.notes ? ' · ' + d.notes : ''}</div>
+        </div>
+      `;
+    });
+  }
+
+  document.getElementById('tab-dispatch').innerHTML = html;
+}
+
+// ══ ADD ITEM ═════════════════════════════════════════════════
+function setAddType(type) {
+  addType = type;
+  document.getElementById('add-type-con').classList.toggle('sel', type === 'consumable');
+  document.getElementById('add-type-dur').classList.toggle('sel', type === 'durable');
+}
+
+function adjustAdd(field, delta) {
+  if (field === 'qty') {
+    addQty = Math.max(0, addQty + delta);
+    document.getElementById('add-qty').textContent = addQty;
+  } else {
+    addReorder = Math.max(0, addReorder + delta);
+    document.getElementById('add-reorder').textContent = addReorder;
+  }
+  const unit = document.getElementById('add-unit').value || 'pcs';
+  document.getElementById('add-qty-unit').textContent = unit;
+  document.getElementById('add-reorder-unit').textContent = unit;
+}
+
+async function saveNewItem() {
+  const name = document.getElementById('add-name').value.trim();
+  const unit = document.getElementById('add-unit').value.trim() || 'pcs';
+  if (!name) return alert('Please enter an item name.');
+  const newId = (Math.max(...inventory.map(i => parseInt(i.id) || 0)) + 1).toString();
+  await appendRow('Inventory', [newId, name, addType, unit, addQty, addReorder, 'TRUE']);
+  await loadAll();
+  addQty = 0; addReorder = 1;
+  document.getElementById('add-name').value = '';
+  document.getElementById('add-unit').value = '';
+  showTab('inventory');
+}
+
+// ══ DISPATCH ═════════════════════════════════════════════════
+function showDispatchScreen() {
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('dis-date').value = today;
+  disQty = 1;
+  document.getElementById('dis-qty').textContent = 1;
+
+  const sel = document.getElementById('dis-item');
+  sel.innerHTML = inventory.map(i => `<option value="${i.id}">${i.name}</option>`).join('');
+  updateDisUnit();
+  sel.onchange = updateDisUnit;
+  showScreen('log-dispatch');
+}
+
+function updateDisUnit() {
+  const id = document.getElementById('dis-item').value;
+  const item = inventory.find(i => i.id === id);
+  document.getElementById('dis-unit').textContent = item ? item.unit : '';
+}
+
+function adjustDispatch(delta) {
+  disQty = Math.max(1, disQty + delta);
+  document.getElementById('dis-qty').textContent = disQty;
+}
+
+async function saveDispatch() {
+  const date = document.getElementById('dis-date').value;
+  const itemId = document.getElementById('dis-item').value;
+  const sender = document.getElementById('dis-sender').value.trim();
+  const notes = document.getElementById('dis-notes').value.trim();
+  const item = inventory.find(i => i.id === itemId);
+  if (!date) return alert('Please enter a date.');
+  if (!sender) return alert('Please enter who sent this.');
+  const id = Date.now().toString();
+  await appendRow('Dispatches', [id, date, itemId, item.name, disQty, sender, notes]);
+  await loadAll();
+  document.getElementById('dis-notes').value = '';
+  document.getElementById('dis-sender').value = '';
+  showTab('dispatch');
+}
+
+// ══ INTERCEPT LOG DISPATCH BUTTON ════════════════════════════
+document.getElementById('screen-log-dispatch').querySelector('.btn.primary').onclick = saveDispatch;
+
+// Fix the FAB-style log dispatch button
+window.addEventListener('DOMContentLoaded', () => {
+  // set today's date
+  document.getElementById('dis-date').value = new Date().toISOString().split('T')[0];
+});
+
+// Make showScreen('log-dispatch') populate the form
+const origShowScreen = showScreen;
+</script>
+
+</body>
+</html>
