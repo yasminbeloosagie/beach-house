@@ -431,9 +431,7 @@
 
 <script>
 // ══ CONFIG ═══════════════════════════════════════════════════
-const API_KEY   = 'AIzaSyDoC_9oXUW0mErg1nn4VSDwV9Wo8ZOWXUQ';
-const SHEET_ID  = '1JEhhxycy0AYqyu04IEm8mx-5Mm882xCMLF8x-80d0_s';
-const BASE_URL  = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values`;
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwZxrNuK9A23bjD_bqyLTLhLuzcb11w0z5orF6ZPsiOY2yzqwYPAUKiY6KLtjsaBt0G/exec';
 const TEAM_PIN  = '1234';
 const ADMIN_PIN = '5678';
 
@@ -455,33 +453,28 @@ let pendingDispatch = null;
 let missingItems = [];
 let checkinCounts = {};
 
-// ══ SHEETS API ═══════════════════════════════════════════════
+// ══ APPS SCRIPT API ══════════════════════════════════════════
 async function readSheet(tab) {
-  const r = await fetch(`${BASE_URL}/${tab}?key=${API_KEY}`);
+  const r = await fetch(`${SCRIPT_URL}?tab=${tab}`);
   const d = await r.json();
-  if (!d.values || d.values.length < 2) return [];
-  const [headers, ...rows] = d.values;
-  return rows.map(row => {
-    const obj = {};
-    headers.forEach((h, i) => obj[h] = row[i] || '');
-    return obj;
-  });
+  if (!Array.isArray(d)) return [];
+  return d;
 }
 
 async function appendRow(tab, values) {
-  const r = await fetch(`${BASE_URL}/${tab}:append?valueInputOption=USER_ENTERED&key=${API_KEY}`, {
+  const r = await fetch(SCRIPT_URL, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ values: [values] })
+    headers: { 'Content-Type': 'text/plain' },
+    body: JSON.stringify({ action: 'append', tab, row: values })
   });
   return r.json();
 }
 
-async function updateCell(tab, range, value) {
-  const r = await fetch(`${BASE_URL}/${tab}!${range}?valueInputOption=USER_ENTERED&key=${API_KEY}`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ values: [[value]] })
+async function updateRow(tab, id, fields) {
+  const r = await fetch(SCRIPT_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain' },
+    body: JSON.stringify({ action: 'update', tab, id, fields })
   });
   return r.json();
 }
@@ -952,18 +945,7 @@ function renderReconciliation() {
 }
 
 async function resolveIssue(id) {
-  // Find row in issues and update resolved column
-  const allIssues = await readSheet('Issues');
-  const headers = ['id','timestamp','type','message','urgency','resolved'];
-  const rowIdx = allIssues.findIndex(i => i.id === id);
-  if (rowIdx === -1) return;
-  // Row index in sheet is rowIdx + 2 (header + 0-index)
-  const sheetRow = rowIdx + 2;
-  await fetch(`${BASE_URL}/Issues!F${sheetRow}?valueInputOption=USER_ENTERED&key=${API_KEY}`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ values: [['TRUE']] })
-  });
+  await updateRow('Issues', id, [['resolved', 'TRUE']]);
   await loadAll();
   renderHomeTab();
 }
@@ -1041,16 +1023,7 @@ async function saveInvQty(id) {
   const qty = document.getElementById('inv-qty-' + id).textContent;
   const item = inventory.find(i => i.id === id);
   if (!item) return;
-  // Find row
-  const all = await readSheet('Inventory');
-  const rowIdx = all.findIndex(i => i.id === id);
-  if (rowIdx === -1) return;
-  const sheetRow = rowIdx + 2;
-  await fetch(`${BASE_URL}/Inventory!E${sheetRow}?valueInputOption=USER_ENTERED&key=${API_KEY}`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ values: [[qty]] })
-  });
+  await updateRow('Inventory', id, [['quantity', qty]]);
   item.quantity = qty;
   alert('Saved!');
   renderInventoryTab();
@@ -1062,14 +1035,7 @@ async function saveInvItem(id) {
   const reorder = document.getElementById('inv-reorder-' + id).textContent;
   const item = inventory.find(i => i.id === id);
   if (!item) return;
-  const all = await readSheet('Inventory');
-  const rowIdx = all.findIndex(i => i.id === id);
-  if (rowIdx === -1) return;
-  const sheetRow = rowIdx + 2;
-  await Promise.all([
-    fetch(`${BASE_URL}/Inventory!E${sheetRow}?valueInputOption=USER_ENTERED&key=${API_KEY}`, { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify({values:[[qty]]}) }),
-    fetch(`${BASE_URL}/Inventory!F${sheetRow}?valueInputOption=USER_ENTERED&key=${API_KEY}`, { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify({values:[[reorder]]}) }),
-  ]);
+  await updateRow('Inventory', id, [['quantity', qty], ['reorder_at', reorder]]);
   item.quantity = qty;
   item.reorder_at = reorder;
   alert('Saved!');
@@ -1090,15 +1056,7 @@ function closeModal() {
 
 async function confirmDelete() {
   if (!deleteTarget) return;
-  const all = await readSheet('Inventory');
-  const rowIdx = all.findIndex(i => i.id === deleteTarget);
-  if (rowIdx === -1) return closeModal();
-  const sheetRow = rowIdx + 2;
-  await fetch(`${BASE_URL}/Inventory!G${sheetRow}?valueInputOption=USER_ENTERED&key=${API_KEY}`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ values: [['FALSE']] })
-  });
+  await updateRow('Inventory', deleteTarget, [['active', 'FALSE']]);
   closeModal();
   await loadAll();
   renderInventoryTab();
